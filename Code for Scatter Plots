@@ -1,0 +1,37 @@
+#Code for RMcorr for the Sugar Biomarkers Analysis
+#Created by Mary May 2023
+
+#checking wd
+getwd()
+setwd("O:/Fellows Projects/Mary/Sugar Biomarkers/DATA")
+
+#download necessary packages
+install.packages("haven")
+library("haven")
+install.packages("ggplot2")
+library("ggplot2")
+
+#call data
+sugar_biomarkers <- read_sas("ftp_sugars_vend.sas7bdat")
+
+#check if it worked
+head(sugar_biomarkers)
+
+#scatter plots
+
+# Create a list to store the scatterplot objects
+scatterplots_sex <- list()
+
+# Iterate over unique categories and create scatterplots
+for (cat in unique(sugar_biomarkers$Sex)) {
+  plot_data_sex <- sugar_biomarkers[sugar_biomarkers$Sex == cat, ]
+  scatterplots_sex[[cat]] <- ggplot(plot_data_sex, aes(x = log_sugar_24uSFmean, y = mean_total_sugars)) +
+    geom_point() +
+    ggtitle(paste("Scatterplot for Sex", cat))+
+    xlab("24hr Urinary Biomarker (mg/d)") +   # Set the custom x-axis label
+    ylab("Total Sugars (g)") }
+
+# Display the scatterplots
+for (cat in unique(sugar_biomarkers$Sex)) {
+  print(scatterplots_sex[[cat]])
+}
