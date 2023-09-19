@@ -1,0 +1,65 @@
+getwd()
+setwd("O:/Fellows Projects/Mary/FSQ FFQ PFFQ Vend/DATA CODE")
+
+#install necessary packages
+
+install.packages("interactions")
+library(interactions)
+library(haven)
+library(sandwich)
+install.packages("sandwich")
+#library(ggstance)
+#library(broom)
+#library(broom.mixed)
+library(dplyr)
+install.packages("ggpubr")
+library(ggpubr)
+library(ggplot2)
+install.packages("gridExtra")
+library(gridExtra)
+
+ss.questionnaire = read_sas("O:/Fellows Projects/Mary/FSQ FFQ PFFQ Vend/DATA CODE/ftp_fsqffqpffq_279.sas7bdat")
+ss.questionnaire$Sex = factor(ss.questionnaire$Sex)
+ss.questionnaire$Race_New = factor(ss.questionnaire$Race_New)
+
+Grp5FFQ = lm(Pct_DKcalGrp5_Mean ~ MEAN_GRP5FFQ + Race_New + Sex + Age + CNV_FFMINDEX + CNV_FMINDEX + MEAN_GRP5FFQ*Sex, data = ss.questionnaire)
+Grp4PFFQ = lm(Pct_DKcalGrp4_Mean ~ MEAN_GRP4PFFQ + Race_New + Sex + Age + CNV_FFMINDEX + CNV_FMINDEX + MEAN_GRP4PFFQ*Sex, data = ss.questionnaire)
+LF_FFQ = lm(PCT_LF_KCAL_Mean ~ Mean_LFFFQ + Race_New + Sex + Age + CNV_FFMINDEX + CNV_FMINDEX + Mean_LFFFQ*Sex, data = ss.questionnaire)
+#####Grp5FFQ#####
+
+Grp5FFQ_plot<-interact_plot(Grp5FFQ,pred = MEAN_GRP5FFQ, modx = Sex, plot.points = T, point.shape = T, partial.residuals=TRUE,
+                             point.size = 2.5, line.thickness = 1.25, jitter=TRUE,
+                             x.label = substitute(paste(bold("Food Rating (Frequency)"))), y.label = substitute(paste(bold("Percent Group Intake (%)"))), 
+                             modx.values=NULL, modx.labels=c("Male","Female"),
+                             main.title = substitute(paste(bold("A. LF/HP Rating vs. Intake by Sex"))), point.alpha = 1.5, colors=c("black","black"))
+Grp5FFQ_plot<-Grp5FFQ_plot + theme_classic()+theme(legend.position=c(0.9,0.9))+scale_shape_manual(values=c(16,1))
+
+######Grp4PFFQ#####
+
+Grp4PFFQ_plot<-interact_plot(Grp4PFFQ,pred = MEAN_GRP4PFFQ, modx = Sex, plot.points = T, point.shape = T, partial.residuals=TRUE,
+                        point.size = 2.5, line.thickness = 1.25, jitter=TRUE,
+                        x.label = substitute(paste(bold("Food Rating (Preference)"))), y.label = substitute(paste(bold("Percent Group Intake (%)"))), 
+                        modx.values=NULL, modx.labels=c("Male","Female"),
+                        main.title = substitute(paste(bold("B. LF/HCC Rating vs. Intake by Sex"))), point.alpha = 1.5, colors=c("black","black"))
+Grp4PFFQ_plot<-Grp4PFFQ_plot + theme_classic()+theme(legend.position=c(0.9,0.9))+scale_shape_manual(values=c(16,1))
+
+#####LF_FFQ#####
+
+LF_FFQ_plot<-interact_plot(LF_FFQ,pred = Mean_LFFFQ, modx = Sex, plot.points = T, point.shape = T, partial.residuals=TRUE,
+                            point.size = 2.5, line.thickness = 1.25, jitter=TRUE, 
+                            x.label = substitute(paste(bold("Food Rating (Frequency)"))), y.label = substitute(paste(bold("Percent Group Intake (%)"))), 
+                            modx.values=NULL, modx.labels=c("Male","Female"),
+                            main.title = substitute(paste(bold("C. LF Rating vs. Intake by Sex  "))), point.alpha = 1.5, colors=c("black","black"))
+LF_FFQ_plot<-LF_FFQ_plot + theme_classic()+theme(legend.position=c(0.9,0.9))+scale_shape_manual(values=c(16,1))
+
+
+#improve image resolution and arrange grid
+grid.arrange(Grp5FFQ_plot, Grp4PFFQ_plot, LF_FFQ_plot, ncol = 2)
+dev.off()
+
+#save plot
+ggsave("Food Rating Simple Slopes(Frequency).png",plot = Grp5FFQ_plot,  units="in", width=5, height=4, dpi=700)
+ggsave("Food Rating Simple Slopes(Preference).png",plot = Grp4PFFQ_plot, units="in", width=5, height=4, dpi=700)
+ggsave("Food Rating Simple Slopes(Frequency LF).png",plot = LF_FFQ_plot, units="in", width=5, height=4, dpi=700)
+
+
